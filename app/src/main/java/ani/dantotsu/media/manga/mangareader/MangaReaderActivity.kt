@@ -164,9 +164,13 @@ class MangaReaderActivity : AppCompatActivity() {
             if (fromUser) {
                 sliding = true
                 if (settings.default.layout != PAGED)
-                    binding.mangaReaderRecycler.scrollToPosition((value.toInt() - 1) / (dualPage { 2 } ?: 1))
+                    binding.mangaReaderRecycler.scrollToPosition((dualPage {
+                        chapter.getIndexFromPage(value.toInt() - 1)
+                    } ?: (value.toInt() - 1)))
                 else
-                    binding.mangaReaderPager.currentItem = (value.toInt() - 1) / (dualPage { 2 } ?: 1)
+                    binding.mangaReaderPager.currentItem = (dualPage {
+                        chapter.getIndexFromPage(value.toInt() - 1)
+                    } ?: (value.toInt() - 1))
                 pageSliderHide()
             }
         }
@@ -514,7 +518,10 @@ class MangaReaderActivity : AppCompatActivity() {
                                 handleController(true)
                             } else handleController(false)
                         }
-                        updatePageNumber(manager.findLastVisibleItemPosition().toLong() * (dualPage { 2 } ?: 1) + 1)
+                        updatePageNumber(dualPage {
+                            chapter.getIndexFromPage(manager.findLastVisibleItemPosition() + 1)
+                                ?.toLong()
+                        } ?: (manager.findLastVisibleItemPosition().toLong() + 1))
                         super.onScrolled(v, dx, dy)
                     }
                 })
@@ -542,7 +549,9 @@ class MangaReaderActivity : AppCompatActivity() {
                         smoothScrollBy(500, 0)
                 }
 
-                scrollToPosition(currentPage / (dualPage { 2 } ?: 1) - 1)
+                scrollToPosition(dualPage {
+                    chapter.getIndexFromPage(currentPage - 1)
+                } ?: (currentPage - 1))
             }
         } else {
             binding.mangaReaderRecyclerContainer.visibility = View.GONE
@@ -561,7 +570,9 @@ class MangaReaderActivity : AppCompatActivity() {
                 registerOnPageChangeCallback(pageChangeCallback)
                 offscreenPageLimit = 5
 
-                setCurrentItem(currentPage / (dualPage { 2 } ?: 1) - 1, false)
+                setCurrentItem(dualPage {
+                    chapter.getIndexFromPage(currentPage - 1)
+                } ?: (currentPage - 1), false)
             }
             onVolumeUp = {
                 binding.mangaReaderPager.currentItem -= 1
@@ -602,7 +613,9 @@ class MangaReaderActivity : AppCompatActivity() {
 
     private val pageChangeCallback = object : ViewPager2.OnPageChangeCallback() {
         override fun onPageSelected(position: Int) {
-            updatePageNumber(position.toLong() * (dualPage { 2 } ?: 1) + 1)
+            updatePageNumber(dualPage {
+                chapter.getIndexFromPage(position + 1)?.toLong()
+            } ?: (position.toLong() + 1))
             handleController(position == 0 || position + 1 >= maxChapterPage)
             super.onPageSelected(position)
         }

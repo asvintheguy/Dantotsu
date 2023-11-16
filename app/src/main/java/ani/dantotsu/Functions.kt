@@ -12,6 +12,7 @@ import android.content.Intent
 import android.content.res.Configuration
 import android.content.res.Resources.getSystem
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.media.MediaScannerConnection
 import android.net.ConnectivityManager
@@ -430,6 +431,19 @@ fun ImageView.loadImage(file: FileUrl?, size: Int = 0) {
             val glideUrl = GlideUrl(file.url) { file.headers }
             Glide.with(this.context).load(glideUrl).transition(withCrossFade()).override(size).into(this)
         }
+    }
+}
+
+fun getImageDimensions(url: String?): Pair<Int, Int>? {
+    if (!url.isNullOrEmpty()) {
+        val options = BitmapFactory.Options().apply {
+            inJustDecodeBounds = true
+        }
+
+        BitmapFactory.decodeFile(url, options)
+        return Pair(options.outWidth, options.outHeight)
+    } else {
+        return null
     }
 }
 
